@@ -1,0 +1,21 @@
+* {
+  box-sizing: border-box;
+}
+.App {
+  background-color: #14141f;
+  min-height: 100vh;
+  width: 100%;
+  font-size: calc(10px + 2vmin);
+  color: white;
+  display: flex;
+  flex-wrap: wrap;
+}
+.App div:first-child {
+  min-width: 60vw;
+  flex-grow: 1;
+  /* /* background: #f4f4f4;  */
+}
+.App div:last-child {
+  width: 22vw;
+  flex-grow: 1;
+}
