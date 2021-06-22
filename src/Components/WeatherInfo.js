@@ -1,19 +1,20 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
+
+function createUniqueKey (n) {
+  let hashString =
+    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  let key = []
+  for (let i = 1; i <= n; ++i) {
+    key.push(hashString[Math.floor(Math.random() * hashString.length)])
+  }
+  return key.join('')
+}
 
 export default function WeatherInfo (props) {
-  const { sunrise, sunset } = props.current
-  let [dayTime, updateDayTime] = useState([])
-  let iconurl = `http://openweathermap.org/img/wn/${props.current.weather[0].icon}@4x.png`
-  //   console.log(iconurl)
-  useEffect(() => {
-    // console.log('Info Props : ', props.current)
-    // console.log('UseEffect of WeatherInfo')
-    // console.log(props.current.sunrise)
-    updateDayTime([
-      new Date(sunrise * 1000).toLocaleTimeString().slice(0, 4) + ' AM',
-      new Date(sunset * 1000).toLocaleTimeString().slice(0, 4) + ' PM'
-    ])
-  }, [])
+  let iconurl = `http://openweathermap.org/img/wn/${
+    props.current.weather[props.current.weather.length - 1].icon
+  }@4x.png`
+  // useEffect(() => {}, [props.city])
 
   function dailyList (weather) {
     const days = [
@@ -26,17 +27,26 @@ export default function WeatherInfo (props) {
       'Saturday'
     ]
     let listData = weather.map((day, index) => {
-      let url = `http://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`
+      const width = window.innerWidth
+      let url = ''
+      if (width < 1536)
+        url = `http://openweathermap.org/img/wn/${day.weather[0].icon}.png`
+      else
+        url = `http://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`
       let today = new Date(day.dt * 1000).getDay()
-      if (index > 5) return
+      if (index > 6) return
       return (
-        <li className='m-2 p-5 backdrop-filter backdrop-blur-2xl text-left flex-grow'>
+        <li
+          className='m-2 p-2 2xl:p-5 backdrop-filter backdrop-blur-2xl text-left min-w-1/4 md:min-w-2/5 2xl:min-w-2/5 w-44 block rounded-2xl'
+          key={createUniqueKey(7)}
+          // style={{ width: '500px' }}
+        >
           <img src={url} alt='condition' />
-          <p>{days[today]}</p>
-          <h2 className='whitespace-nowrap capitalize text-sm'>
+          <p className='text-base 2xl:text-xl'>{days[today]}</p>
+          <h2 className='whitespace-nowrap capitalize text-xs md:text-sm 2xl:text-base'>
             {day.weather[0].description}
           </h2>
-          <p>
+          <p className='text-xs xl:text-sm'>
             {parseInt(day.temp.min)}&#186; - {parseInt(day.temp.max)}&#186;
           </p>
         </li>
@@ -50,18 +60,25 @@ export default function WeatherInfo (props) {
       let today = new Date(day.dt * 1000).toLocaleTimeString()
       if (index === 0) {
         return (
-          <li className='m-4 text-center flex-grow'>
-            <p className='text-7xl'>{parseInt(day.temp)}&#186;</p>
+          <li className='m-4 text-center flex-grow' key={createUniqueKey(7)}>
+            <p className='text-4xl xl:text-5xl 2xl:text-7xl'>
+              {parseInt(day.temp)}&#186;
+            </p>
           </li>
         )
       }
-      if (index > 5) return
+      if (index > 7) return
       return (
-        <li className='m-4 text-center flex-grow'>
+        <li
+          className='ml-7 mr-7 text-center flex-grow'
+          key={createUniqueKey(6)}
+        >
           <p className='text-sm'>
             {today.slice(0, 4)} {today.slice(-2)}
           </p>
-          <p className='text-4xl my-0'>{parseInt(day.temp)}&#186;</p>
+          <p className='xl:text-3xl 2xl:text-4xl my-0'>
+            {parseInt(day.temp)}&#186;
+          </p>
           <h2 className='whitespace-nowrap capitalize text-sm whitespace-nowrap'>
             <img
               src={url}
@@ -78,37 +95,46 @@ export default function WeatherInfo (props) {
   }
 
   return (
-    <div className='weather flex-grow flex items-center pl-24 relative'>
-      <ul className='text-center'>
-        <li className='fixed top-12'>
-          <div className='hourlyForecast'>
-            <ul className='flex text-lg mb-'>{hourlyList(props.hourly)}</ul>
-          </div>
+    <div className='weather flex-grow flex items-center md:pl-24 relative w-full box-border'>
+      <ul className='text-center relative w-11/12'>
+        <li className='bg-gray-100 xl:hidden fixed flex w-4/5 left-1/2 transform py-1 box-border -translate-x-1/2 top-4 box-border shadow-2xl rounded-sm overflow-hidden'>
+          <input
+            type='text'
+            class='bg-gray-100 text-gray-700 text-sm py-1 pl-2 outline-none border-0'
+            placeholder='Search another location...'
+            id='searchValue'
+          />
+          <button
+            class='bg-yellow-600 absolute right-0 top-0 px-4 h-full text-base'
+            onClick={props.search}
+          >
+            Search
+          </button>
         </li>
-        <li className='text-center flex flex-col items-center'>
-          <div className='capitalize'>
+        <li className='fixed left-8 2xl:left-14 top-24 xl:top-12 w-11/12 xl:w-2/3 box-border'>
+          <ul className='hourlyForecast flex text-lg overflow-x-scroll overflow-conatiner-1 box-border'>
+            {hourlyList(props.hourly)}
+          </ul>
+        </li>
+        <li className='text-center flex flex-col items-center md:-mt-24'>
+          <div className='capitalize xl:text-2xl -mb-8 xl:-mb-8 2xl:-mb-1 xl:text-3xl ml-5 md:ml-0'>
             {props.current.weather[0].description}
           </div>
-          <div className='flex items-center text-6xl 2xl:text-9xl w-full justify-center text-center'>
+          <div className='flex items-center ml-24 md:ml-0 text-5xl md:text-7xl 2xl:text-9xl justify-center text-center'>
             <span className='font-bold'>
               {parseInt(props.current.temp)}&#186;C
             </span>
             <img src={iconurl} alt='condition' />
           </div>
-          {/* <div className='relative flex justify-around'>
-            <section className='flex flex-col items-center'>
-              <span className='text-sm block text-gray-400'>Sunrise</span>
-              <span className='text-xl'>{dayTime[0]}</span>
-            </section>
-            <section className='flex flex-col items-center'>
-              <span className='text-sm block text-gray-400'>Sunset</span>
-              <span className='text-xl'>{dayTime[1]}</span>
-            </section>
-          </div> */}
+          <div className='capitalize text-3xl md:text-4xl xl:text-5xl font-bold -mt-8 md:-mt-6 2xl:-mt-1 -ml-8 xl:ml-0'>
+            {props.city}
+          </div>
         </li>
-        <li className='flex justify-start mt-24 fixed bottom-12'>
-          <div className='daysForecast'>
-            <ul className='flex text-lg'>{dailyList(props.daily)}</ul>
+        <li className='flex justify-start bottom-4  left-8 2xl:left-14 2xl:mt-24 w-11/12 xl:w-2/3 fixed 2xl:bottom-12'>
+          <div className='daysForecast w-full'>
+            <ul className='overflow-conatiner-1 flex text-lg flex-nowrap flex-row w-full overflow-x-scroll'>
+              {dailyList(props.daily)}
+            </ul>
           </div>
         </li>
       </ul>

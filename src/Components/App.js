@@ -4,7 +4,7 @@ import Additional from './AdditionalInfo'
 import Loading from './Loading'
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import Bg from './../Assets/Images/bg5.jpg'
+import Bg from './../Assets/Images/bg1.jpg'
 
 function App () {
   const homepageBgimage = {
@@ -12,29 +12,37 @@ function App () {
     height: '100vh',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
-    backgroundSize: 'cover'
+    backgroundSize: 'cover',
+    backgroundAttachment: 'fixed'
   }
 
   let [weatherdata, updateData] = useState(null)
   let [loading, updateLoading] = useState(false)
+  let [currentCity, updateCity] = useState('ranchi')
+  let previouCity = 'ranchi'
   useEffect(() => {
     const ApiKey = '87b2ef091f67ac5219079055027addc8'
     const params = {
-      q: 'ranchi',
+      q: currentCity,
       appid: ApiKey
     }
     async function fetchLocation () {
-      let geolocation = await axios.get(
-        `http://api.openweathermap.org/geo/1.0/direct`,
-        { params }
-      )
+      await axios
+        .get(`http://api.openweathermap.org/geo/1.0/direct`, { params })
+        .then(response => {
+          const lat = response.data[0].lat
+          const lon = response.data[0].lon
+          previouCity = response.data[0].name
+          console.log(previouCity)
+          getWeatherCondition(lat, lon, ApiKey)
+        })
+        .catch(error => {
+          console.log(error)
+        })
       // console.log(geolocation.data[0].lon)
-      const lat = geolocation.data[0].lat
-      const lon = geolocation.data[0].lon
-      getWeatherCondition(lat, lon, ApiKey)
     }
     fetchLocation()
-  }, [])
+  }, [currentCity])
   async function getWeatherCondition (lat, lon, Key) {
     const params = {
       lat: lat,
@@ -42,26 +50,34 @@ function App () {
       appid: Key,
       units: 'metric'
     }
-    let weatherData = await axios.get(
-      'https://api.openweathermap.org/data/2.5/onecall',
-      { params }
-    )
-    updateData(weatherData)
-    updateLoading(true)
+    let weatherData = await axios
+      .get('https://api.openweathermap.org/data/2.5/onecall', { params })
+      .then(response => {
+        updateData(response)
+        updateLoading(true)
+      })
   }
 
+  let interval
+  // let prevCity = 'ranchi'
   function handleChange (e) {
     // console.log(e)
-    let flag = false
-    let Interval = setInterval(() => {
-      if (!flag) {
-        clearInterval(Interval)
-        flag = false
+    if (interval) clearTimeout(interval)
+    interval = setTimeout(() => {
+      console.log(e.target.value)
+      if (e.target.value.length < 3) updateCity(previouCity)
+      else {
+        updateCity(e.target.value)
       }
-      console.log(e)
-      flag = true
-    }, 500)
+    }, 1000)
   }
+
+  function handleSearch () {
+    let inputData = document.querySelector('#searchValue').value
+    console.log(inputData)
+    if (inputData.length > 3) updateCity(inputData)
+  }
+
   // console.log('stateWeatherData : ', weatherdata)
   return (
     <div
@@ -74,12 +90,15 @@ function App () {
             current={weatherdata.data.current}
             daily={weatherdata.data.daily}
             hourly={weatherdata.data.hourly}
+            city={currentCity}
+            search={handleSearch}
           />
           <Additional
             current={weatherdata.data.current}
             daily={weatherdata.data.daily}
             timezone={weatherdata.data.timezone}
             onchange={handleChange}
+            city={currentCity}
           />
         </>
       ) : (

@@ -3,19 +3,24 @@
 }
 .App {
   background-color: #14141f;
-  min-height: 100vh;
+  min-height: 100%;
   width: 100%;
   font-size: calc(10px + 2vmin);
   color: white;
   display: flex;
   flex-wrap: wrap;
+  /* overflow: hidden; */
 }
 .App div:first-child {
-  min-width: 60vw;
+  min-width: 400px;
+  width: 60vw;
   flex-grow: 1;
   /* /* background: #f4f4f4;  */
 }
 .App div:last-child {
-  width: 22vw;
+  width: 7vw;
   flex-grow: 1;
+}
+.overflow-conatiner-1::-webkit-scrollbar {
+  display: none;
 }
