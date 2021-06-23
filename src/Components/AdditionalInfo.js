@@ -16,7 +16,7 @@ export default function AdditionalInfo (props) {
   }, [props.city])
   useEffect(() => {
     showSearchData()
-    console.clear()
+    // console.clear()
   }, [props.searchData])
 
   function showSearchData () {
