@@ -14,8 +14,26 @@ export default function WeatherInfo (props) {
   let iconurl = `http://openweathermap.org/img/wn/${
     props.current.weather[props.current.weather.length - 1].icon
   }@4x.png`
-  // useEffect(() => {}, [props.city])
-
+  useEffect(() => {
+    // position = document.querySelector('#temp').getBoundingClientRect().top
+    // console.log(height)
+  })
+  function handleFocus (e) {
+    if (window.innerWidth < 540) {
+      let tempVariable = document.querySelector('#temp')
+      setTimeout(() => {
+        tempVariable.setAttribute('style', 'margin-top:140px')
+      }, 100)
+    }
+  }
+  function handleBlur (e) {
+    if (window.innerWidth < 540) {
+      let tempVariable = document.querySelector('#temp')
+      setTimeout(() => {
+        tempVariable.removeAttribute('style')
+      }, 100)
+    }
+  }
   function dailyList (weather) {
     const days = [
       'Sunday',
@@ -95,7 +113,7 @@ export default function WeatherInfo (props) {
   }
 
   return (
-    <div className='weather flex-grow flex items-center md:pl-24 relative w-full box-border'>
+    <div className='weather flex-grow flex items-center md:pl-24 relative w-full box-border h-screen'>
       <ul className='text-center relative w-11/12'>
         <li className='bg-gray-100 xl:hidden fixed flex w-4/5 left-1/2 transform py-1 box-border -translate-x-1/2 top-4 box-border shadow-2xl rounded-sm overflow-hidden'>
           <input
@@ -103,6 +121,8 @@ export default function WeatherInfo (props) {
             class='bg-gray-100 text-gray-700 text-sm py-1 pl-2 outline-none border-0'
             placeholder='Search another location...'
             id='searchValue'
+            onFocus={handleFocus}
+            onBlur={handleBlur}
           />
           <button
             class='bg-yellow-600 absolute right-0 top-0 px-4 h-full text-base'
@@ -116,7 +136,10 @@ export default function WeatherInfo (props) {
             {hourlyList(props.hourly)}
           </ul>
         </li>
-        <li className='text-center flex flex-col items-center md:-mt-24'>
+        <li
+          className='text-center flex flex-col items-center md:-mt-24'
+          id='temp'
+        >
           <div className='capitalize xl:text-2xl -mb-8 xl:-mb-8 2xl:-mb-1 xl:text-3xl ml-5 md:ml-0'>
             {props.current.weather[0].description}
           </div>
@@ -126,8 +149,8 @@ export default function WeatherInfo (props) {
             </span>
             <img src={iconurl} alt='condition' />
           </div>
-          <div className='capitalize text-3xl md:text-4xl xl:text-5xl font-bold -mt-8 md:-mt-6 2xl:-mt-1 -ml-8 xl:ml-0'>
-            {props.city}
+          <div className='capitalize text-3xl md:text-4xl font-bold -mt-8 md:-mt-6 2xl:-mt-1 -ml-24 md:-ml-20 whitespace-nowrap'>
+            {props.city}, {props.country}
           </div>
         </li>
         <li className='flex justify-start bottom-4  left-8 2xl:left-14 2xl:mt-24 w-11/12 xl:w-2/3 fixed 2xl:bottom-12'>

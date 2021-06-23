@@ -13,69 +13,115 @@ function App () {
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
     backgroundSize: 'cover',
-    backgroundAttachment: 'fixed'
+    backgroundAttachment: 'fixed',
+    minHeight: '700px'
   }
 
   let [weatherdata, updateData] = useState(null)
   let [loading, updateLoading] = useState(false)
-  let [currentCity, updateCity] = useState('ranchi')
+  let [currentLocale, updateLocale] = useState(['ranchi', 'IN'])
+  let [searchData, updateSearchData] = useState(false)
+  let [totalCities, updateCities] = useState(null)
   let previouCity = 'ranchi'
   useEffect(() => {
+    getCoordinates()
+  }, [])
+  function getCoordinates (city) {
     const ApiKey = '87b2ef091f67ac5219079055027addc8'
-    const params = {
-      q: currentCity,
-      appid: ApiKey
+    let params = []
+    if (city) {
+      params = {
+        q: city,
+        appid: ApiKey
+      }
+    } else {
+      params = {
+        q: currentLocale[0],
+        appid: ApiKey
+      }
     }
+
     async function fetchLocation () {
       await axios
-        .get(`http://api.openweathermap.org/geo/1.0/direct`, { params })
+        .get(`https://api.openweathermap.org/geo/1.0/direct`, { params })
         .then(response => {
           const lat = response.data[0].lat
           const lon = response.data[0].lon
           previouCity = response.data[0].name
-          console.log(previouCity)
-          getWeatherCondition(lat, lon, ApiKey)
+          // console.log(response)
+          getWeatherCondition(
+            lat,
+            lon,
+            response.data[0].name,
+            response.data[0].country
+          )
         })
         .catch(error => {
           console.log(error)
         })
-      // console.log(geolocation.data[0].lon)
     }
     fetchLocation()
-  }, [currentCity])
-  async function getWeatherCondition (lat, lon, Key) {
+  }
+  async function getWeatherCondition (lat, lon, name, country) {
+    const ApiKey = '87b2ef091f67ac5219079055027addc8'
     const params = {
       lat: lat,
       lon: lon,
-      appid: Key,
+      appid: ApiKey,
       units: 'metric'
     }
     let weatherData = await axios
       .get('https://api.openweathermap.org/data/2.5/onecall', { params })
       .then(response => {
         updateData(response)
+        updateLocale([name, country])
         updateLoading(true)
       })
   }
 
+  function getCities (value) {
+    const ApiKey = '87b2ef091f67ac5219079055027addc8'
+    let params = {
+      q: value,
+      limit: 10,
+      appid: ApiKey
+    }
+    async function fetchLocation () {
+      await axios
+        .get(`https://api.openweathermap.org/geo/1.0/direct`, { params })
+        .then(response => {
+          updateCities(response)
+        })
+        .catch(error => {
+          console.log('Error occured : ', error)
+        })
+    }
+    fetchLocation()
+  }
+
   let interval
-  // let prevCity = 'ranchi'
+  let count = true
   function handleChange (e) {
-    // console.log(e)
+    if (count) updateSearchData(true)
     if (interval) clearTimeout(interval)
     interval = setTimeout(() => {
-      console.log(e.target.value)
-      if (e.target.value.length < 3) updateCity(previouCity)
-      else {
-        updateCity(e.target.value)
-      }
+      count = false
+      getCities(e.target.value)
     }, 1000)
+  }
+
+
+  function loadData (lat, lon, name, country) {
+    console.log(lat, lon, name, country)
+    updateSearchData(false)
+    getWeatherCondition(lat, lon, name, country)
+    console.log('clicked!!!')
   }
 
   function handleSearch () {
     let inputData = document.querySelector('#searchValue').value
     console.log(inputData)
-    if (inputData.length > 3) updateCity(inputData)
+    if (inputData.length > 3) getCoordinates(inputData)
   }
 
   // console.log('stateWeatherData : ', weatherdata)
@@ -90,7 +136,8 @@ function App () {
             current={weatherdata.data.current}
             daily={weatherdata.data.daily}
             hourly={weatherdata.data.hourly}
-            city={currentCity}
+            city={currentLocale[0]}
+            country={currentLocale[1]}
             search={handleSearch}
           />
           <Additional
@@ -98,7 +145,10 @@ function App () {
             daily={weatherdata.data.daily}
             timezone={weatherdata.data.timezone}
             onchange={handleChange}
-            city={currentCity}
+            city={currentLocale[0]}
+            searchData={searchData}
+            cities={totalCities}
+            loadData={loadData}
           />
         </>
       ) : (
