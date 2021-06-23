@@ -153,7 +153,7 @@ export default function WeatherInfo (props) {
             {props.city}, {props.country}
           </div>
         </li>
-        <li className='flex justify-start bottom-14 md:bottom-4  left-8 2xl:left-14 2xl:mt-24 w-11/12 xl:w-2/3 fixed 2xl:bottom-12'>
+        <li className='flex justify-start bottom-7 md:bottom-4  left-8 2xl:left-14 2xl:mt-24 w-11/12 xl:w-2/3 fixed 2xl:bottom-12'>
           <div className='daysForecast w-full'>
             <ul className='overflow-conatiner-1 flex text-lg flex-nowrap flex-row w-full overflow-x-scroll'>
               {dailyList(props.daily)}
