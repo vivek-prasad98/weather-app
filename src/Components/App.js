@@ -27,7 +27,7 @@ function App () {
     getCoordinates()
   }, [])
   function getCoordinates (city) {
-    const ApiKey = '87b2ef091f67ac5219079055027addc8'
+    const ApiKey = 'your_Api_Key'
     let params = []
     if (city) {
       params = {
@@ -48,7 +48,6 @@ function App () {
           const lat = response.data[0].lat
           const lon = response.data[0].lon
           previouCity = response.data[0].name
-          // console.log(response)
           getWeatherCondition(
             lat,
             lon,
@@ -63,7 +62,7 @@ function App () {
     fetchLocation()
   }
   async function getWeatherCondition (lat, lon, name, country) {
-    const ApiKey = '87b2ef091f67ac5219079055027addc8'
+    const ApiKey = 'your_api_key'
     const params = {
       lat: lat,
       lon: lon,
@@ -80,7 +79,7 @@ function App () {
   }
 
   function getCities (value) {
-    const ApiKey = '87b2ef091f67ac5219079055027addc8'
+    const ApiKey = 'your_api_key'
     let params = {
       q: value,
       limit: 10,
@@ -124,7 +123,6 @@ function App () {
     if (inputData.length > 3) getCoordinates(inputData)
   }
 
-  // console.log('stateWeatherData : ', weatherdata)
   return (
     <div
       className='App flex flex-wrap backdrop-filter backdrop-blur-2xl'
